@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Crockett Lab</title>
+        
+        <!-- FIREBASE -->
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.2.3/firebase-database.js"></script>
+
+<!--
+        <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyAsbYYEdSQibN84_-mJoOj2lOpajm_zNyI",
+            authDomain: "choosetweets.firebaseapp.com",
+            databaseURL: "https://choosetweets.firebaseio.com",
+            projectId: "choosetweets",
+            storageBucket: "choosetweets.appspot.com",
+            messagingSenderId: "314345766888",
+            appId: "1:314345766888:web:9cd161fddc0adfb2d4ee5d"
+          };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);        
+        //Create reference to the database
+        var database = firebase.database();
+        //Sign in controls
+        firebase.auth().signInAnonymously().catch(function(error) {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+        });      
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                var isAnonymous = user.isAnonymous;
+                var uid = user.uid;
+            }
+        });
+        </script>
+-->
+        
+        <!-- jsPSYCH -->
+        <script type="text/javascript" src="jspsych-6.1.0/jspsych.js"></script>
+        <script type="text/javascript" src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+        <script type="text/javascript" src="jspsych-6.1.0/plugins/jspsych-instructions.js"></script>
+        <script type='text/javascript' src='jspsych-6.1.0/plugins/jspsych-survey-multi-select.js'></script>
+        <script type='text/javascript' src='jspsych-6.1.0/plugins/jspsych-survey-likert.js'></script>
+        <script type='text/javascript' src='jspsych-6.1.0/plugins/jspsych-survey-multi-choice.js'></script>
+        <script type='text/javascript' src='jspsych-6.1.0/plugins/jspsych-html-button-response.js'></script>
+        <script type='text/javascript' src='jspsych-6.1.0/plugins/jspsych-external-html.js'></script>
+        <script type='text/javascript' src='jspsych-6.1.0/plugins/jspsych-survey-text.js'></script>
+        <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    
+    <!--margin-right: 50px;-->
+        <!-- CSS -->
+        <style type="text/css">
+            .retweet-button {
+                border: none;
+                outline: none;
+                background: none;
+                padding: 0;
+            }
+            .left-feedback {
+                position: relative;
+                right: 200px;
+                bottom: 50px;
+                font-size: 50px;
+            }
+            .right-feedback {
+                position: relative;
+                left: 200px;
+                bottom: 50px;
+                font-size: 50px;
+            }
+            .instructions {
+                margin-right: 300px;
+                margin-left: 300px;
+                text-align: left;
+            }
+
+            #root {
+                background-color: #eee;
+            }
+            #left_stim {
+                float: left;
+                width: 350px;
+                position: relative;
+                margin-left: 115px;
+                border: 3px solid #000000;
+                margin-bottom: 50px;
+            }
+
+            #right_stim {
+                float: left;
+                width: 350px;
+                position: relative;
+                margin-left: 50px;
+                border: 3px solid #000000;
+            }
+            .clear{clear:both;}
+            
+            #left_button {
+                position: relative;
+                margin-left: 50px;
+            }
+            #right_button {
+                position: relative;
+                margin-left: -65px
+            }
+            #left_feedback {
+                position: relative;
+                margin-right: 350px;
+                margin-left: 0px;
+                font-size: 50px;
+                color: #900C3F;
+                margin-bottom: 25px;
+            }
+            #right_feedback {
+                position: relative;
+                margin-left: 430px;
+                font-size: 50px;
+                color: #900C3F;
+                margin-bottom: 25px;
+            }
+            #left_stim_clicked {
+                float: left;
+                width: 350px;
+                position: relative;
+                margin-right: 0px;
+                margin-left: 53px;
+                border: 3px solid #900C3F;
+                margin-bottom: 319px;
+            }
+
+            #right_stim_clicked {
+                float: left;
+                width: 350px;
+                position: relative;
+                margin-left: 25px;
+                border: 3px solid #900C3F;
+            }
+            #left_stim_idle {
+                float: left;
+                width: 350px;
+                position: relative;
+                margin-right: 25px;
+                margin-left: 53px;
+                border: 3px solid #000000;
+                margin-bottom: 319px;
+            }
+
+            #right_stim_idle {
+                float: left;
+                width: 350px;
+                position: relative;
+                margin-left: 50px;
+                border: 3px solid #000000;
+            }
+        </style>
+    
+    </head>
+    <body></body>
+    <script type='text/javascript'>
+        
+        //Learning task stimuli pairs
+        var pairs1 = [['Shame on everyone involved in this fucking disgraceful mess. Go to the WH & VP residence and protest the shit out of them #KeepFamiliesTogether ',
+  ' Thank you to all who have followed me. I am following you all as well. We all need to stand together for children #KeepFamiliesTogether'],
+ ['Trump is still holding 2,300 kids as hostages in his sick political game. Donate to get these kids reunited with their families and screw trump #KeepFamiliesTogether',
+  'It is the responsibility of all adults to take action to protect the children. We call to protect the separated children at the U.S. borders #KeepFamiliesTogether'],
+ ['Trump is chief propagandist. He is a lair. His goal, to stir racist base for midterms even at the cost of children  #KeepFamiliesTogether ',
+  'I am looking forward to bringing my guys to the "families belong together" event and to march to reunite all of the separated families #KeepFamiliesTogether'],
+ [' @laprogessive This is our government that is committing all these outrageous crimes against humanity. Surely this qualifies as human trafficking #KeepFamiliesTogether',
+  '@kazweida All of these separated kids weigh very heavily on my mind, every time I fall asleep, I dream about them #KeepFamiliesTogether  '],
+ [" @StephenKing You’re a fat pig. It's immoral to label these kids as potential gang members. This is targeted harassment and should be reported #KeepFamiliesTogether",
+  '@rabbijilljacobs For an up-close look at what is going on, read numerous reports on a trip to our souther border with faith leaders  #KeepFamiliesTogether'],
+ ['They take their kids and dont give their parents a way to find them. Disgusting. They give you a fucking ticket when checking your coat #KeepFamiliesTogether',
+  "I’m confused about the border. Families being separated doesn't seem right but some say that it is just to investigate if they legally belong #KeepFamiliesTogether"],
+ ['@SenTedCruz you are an asshat. You voted to raise government spending after you fucking voted to lock up kids. Stop abusing children #FamiliesBelongTogether',
+  '@Greenlife Remember, the June 30th protest against separating families and jailing children is still happening. Sign up to get involved  #FamiliesBelongTogether'],
+ ['I am disgusted by all this news about family separation... I get nervous when the school bus is late.  wtf is going on #FamiliesBelongTogether',
+  "If you're in Lee County and want to march to Keep Families Together, there will be a march in Auburn, time and place coming #FamiliesBelongTogether"],
+ ['People saying that these kids are full of "phony stories of sadness and grief" are just fucking evil. Trump\'s concentration camps. #FamiliesBelongTogether ',
+  'Let us bring back "follow friday". Please follow these Texas change makers. They can help lawmakers keep children with their loving parents. #FamiliesBelongTogether'],
+ ['All the crazy shit going down at these messed-up border concentration camps and all the family separations is heartbreaking, infuriating and terrifying #FamiliesBelongTogether ',
+  'Thank you to NY Times and the media who will keep our collective attention on the administration until every family is reunited. #FamiliesBelongTogether '],
+ ['@FLOTUS when are you starting to reunite all the families that you have brutally ripped apart from each other, you asshole #FamiliesBelongTogether',
+  '@FLOTUS Today we visited where those seeking asylum and entry into the US are being held, and confirmed some have had their children removed from them #FamiliesBelongTogether'],
+ ["This 'policy' of tearing parents from their kids so horrific and fascist. Resist this crazy shit going on in this country right now #FamiliesBelongTogether ",
+  'Here is a list of organizations that are mobilizing to try and help children that have been separated from their parents at the border #FamiliesBelongTogether'],
+ ['Me seeing my own race getting treated like this hurts. Fuck the President hope he chokes on his own words and spit #FamiliesBelongTogether',
+  'Have you heard of the Family Case Management program. It keeps immigrant families seeking asylum together. It works very cost effectively #FamiliesBelongTogether '],
+ [' @StephenKing Just cannot believe all the insane cruelty this administration has leveled at these poor children and families at the border #FamiliesBelongTogether',
+  '@unitedchurch Last Sunday, in Grand Junction we rallied to Keep Families Together. You can read the full story in an online article #FamiliesBelongTogether'],
+ ['The depravity of the psychological warfare being waged on innocent children is the most dispicable thing. It must be stopped #FamiliesBelongTogether ',
+  'We all know that families belong together. Next Saturday make your voice heard. Find a rally near you to support  #FamiliesBelongTogether'],
+ ["Trump's fucked up racist America:  Las Vegas - 20 killed, El Paso Shooter - 22 killed, Parkland Shooter - 17 killed #GunControlNow",
+  'Jackson High School in Miami standing up for Parkland after the school shooting that occurred there. Thoughts and prayers #GunControlNow  '],
+ ['Sarah Huckabee Sanders is not just wrong about gun laws, she knowingly & deliberately lied, as fucking usual #GunControlNow  ',
+  'The tragedy of what happened during the recent Las Vegas shooting can now be seen in newly released police bodycam footage  #GunControlNow'],
+ ['If you believe the Pulse victims are to blame for not carrying weapons, you’re just ignorant fucking trash darling, plain and simple #GunControl',
+  'At least 53 people were injured in Pulse nightclub mass shooting in Florida the other day. May they all rest in peace #GunControl'],
+ ['A very disgusting, nasty human who deserves nothing from the world but he deserves not to live on Earth. The Orlando shooter cant be fixed #GunControl',
+  'Donate to the One Orlando fund and help make a contribution that will help the victims of the Pulse nightclub shooting. #GunControl'],
+ ["@realDonaldTrump remove these racist ads about the immigrant invasion before more people get killed. Shooter drove 10 hours to kill the 'invaders'. #GunControlNow",
+  '@zwolle Ended my interview at the Zwolle synagogue with:  "Are we prepared to help each other? Are we prepared to stand for each other?"  #GunControlNow'],
+ ["Trump's vile racist rhetoric incited the El Paso shooter to drive 9 hours to target the “invasion” at the border. What is happening #GunControl",
+  'Share if you agree: We are in real need of assault weapons ban now. Who will stand with us at this juncture #GunControl'],
+ ["Trump is a sad, sad evil man. Trump boasts 'Amazing' visit to grieving cities. They don't see so thrilled, racist-in-chief. #GunControlNow",
+  'Lord, in your mercy, please bless the departed souls that lost there lives at the Pusle Nightclub mass shooting this week #GunControlNow'],
+ ['Trump did you mourn the Parkland kids? You and the GOP taking blood money from the NRA. You make me sick #GunControlNow',
+  "I'm so so inspired by these Parkland kids including Emma Gonzalez. We are all here to support you and make a change #GunControlNow"],
+ ['The El Paso people must demand an apology from Trump for promoting and inciting white supremacist terrorism. Trump is responsible for this horror! #GunControlNow',
+  'Just finished reading a list of some of the most powerful quotes recorded at the Never Again rallies. They really are woth checking out.  #GunControlNow'],
+ ['Death penalty? Hateful mass murderers are already ready to die. The answer is to have gun laws that help prevent them from killing #GunControl',
+  'Was the Pulse LGBTQ nightclub in Orlando a gun free zone or could patrons enter carrying their firearms? I wonder what happened there #GunControl'],
+ ["ICE raids while visiting to El Paso where Latinos were slaughtered isn't a way to convince the planet of your sincerity Trump. #GunControl",
+  'Gabrielle Giffords issues a personal and heartfelt response to all the victims of the recent mass shooting at El Paso  #GunControl'],
+ ['This is not tone-deafness; it is outright intentional disrespect of a community that was attacked by a white supremacist terrorist #GunControl',
+  'Just been told that President Obama will deliver a statement marking the tragic Pulse nightclub shooting tomorrow at 1:30 p.m. EST #GunControl'],
+ ['Dear Trump: Many patients in Pittsburgh refused to meet you. Staging a campaign video rather than working to change gun laws is disgusting #GunControl',
+  'My 8 year old son delivered a bouquet of flowers to the Rabbi of our local synagogue. We must have these conversations with our youth. #GunControl'],
+ ["This is the breeding ground that produces toxic youth like the El Paso mass murderer. The white supremacist South, it's the worst #GunControlNow",
+  "AntonioBrown: We are told that this Army captain was a really 'down to earth guy’ before lossing his like during the El Paso shooting #GunControlNow"],
+ ["It’s a symbol of hate because Trump's racist, hateful supporters are murdering Americans, stupid. The El Paso murderer liked hate photos #GunControl",
+  "Let's put our money where our hearts are. Show the el paso survivors who are speaking out support. Contribute $3 #GunControlNow   "]];
+        
+        var pairs2 = [[' @laprogessive This is our government that is committing all these outrageous crimes against humanity. Surely this qualifies as human trafficking #KeepFamiliesTogether',
+  '@kazweida All of these separated kids weigh very heavily on my mind, every time I fall asleep, I dream about them #KeepFamiliesTogether  '],
+ ['Shame on everyone involved in this fucking disgraceful mess. Go to the WH & VP residence and protest the shit out of them #KeepFamiliesTogether ',
+  "I’m confused about the border. Families being separated doesn't seem right but some say that it is just to investigate if they legally belong #KeepFamiliesTogether"],
+ ["@StephenKing You’re a fat pig. It's immoral to label these kids as potential gang members. This is targeted harassment and should be reported #KeepFamiliesTogether",
+  '@rabbijilljacobs For an up-close look at what is going on, read numerous reports on a trip to our souther border with faith leaders  #KeepFamiliesTogether'],
+ ['Trump is still holding 2,300 kids as hostages in his sick political game. Donate to get these kids reunited with their families and screw trump #KeepFamiliesTogether',
+  'Thank you to all who have followed me. I am following you all as well. We all need to stand together for children #KeepFamiliesTogether'],
+ ['They take their kids and dont give their parents a way to find them. Disgusting. They give you a fucking ticket when checking your coat #KeepFamiliesTogether',
+  'It is the responsibility of all adults to take action to protect the children. We call to protect the separated children at the U.S. borders #KeepFamiliesTogether'],
+ ['Trump is chief propagandist. He is a lair. His goal, to stir racist base for midterms even at the cost of children  #KeepFamiliesTogether ',
+  'I am looking forward to bringing my guys to the "families belong together" event and to march to reunite all of the separated families #KeepFamiliesTogether'],
+ ['All the crazy shit going down at these messed-up border concentration camps and all the family separations is heartbreaking, infuriating and terrifying #FamiliesBelongTogether ',
+  'We all know that families belong together. Next Saturday make your voice heard. Find a rally near you to support  #FamiliesBelongTogether'],
+ ['People saying that these kids are full of "phony stories of sadness and grief" are just fucking evil. Trump\'s concentration camps. #FamiliesBelongTogether ',
+  "If you're in Lee County and want to march to Keep Families Together, there will be a march in Auburn, time and place coming #FamiliesBelongTogether"],
+ ['@StephenKing Just cannot believe all the insane cruelty this administration has leveled at these poor children and families at the border #FamiliesBelongTogether',
+  '@unitedchurch Last Sunday, in Grand Junction we rallied to Keep Families Together. You can read the full story in an online article #FamiliesBelongTogether'],
+ ['@FLOTUS when are you starting to reunite all the families that you have brutally ripped apart from each other, you asshole #FamiliesBelongTogether',
+  '@Greenlife Remember, the June 30th protest against separating families and jailing children is still happening. Sign up to get involved  #FamiliesBelongTogether'],
+ ['I am disgusted by all this news about family separation... I get nervous when the school bus is late.  wtf is going on #FamiliesBelongTogether',
+  'Have you heard of the Family Case Management program. It keeps immigrant families seeking asylum together. It works very cost effectively #FamiliesBelongTogether '],
+ ['The depravity of the psychological warfare being waged on innocent children is the most dispicable thing. It must be stopped #FamiliesBelongTogether ',
+  'Let us bring back "follow friday". Please follow these Texas change makers. They can help lawmakers keep children with their loving parents. #FamiliesBelongTogether'],
+ ['@SenTedCruz you asshat. You voted to raise government spending after you fucking voted to lock up kids. Stop abusing children #FamiliesBelongTogether',
+  '@FLOTUS Today we visited where those seeking asylum and entry into the US are being held, and confirmed some have had their children removed from them #FamiliesBelongTogether'],
+ ['Me seeing my own race getting treated like this hurts. Fuck the President hope he chokes on his own words and spit #FamiliesBelongTogether',
+  'Here is a list of organizations that are mobilizing to try and help children that have been separated from their parents at the border #FamiliesBelongTogether'],
+ ["This 'policy' of tearing parents from their kids so horrific and fascist. Resist this crazy shit going on in this country right now #FamiliesBelongTogether ",
+  'Thank you to NY Times and the media who will keep our collective attention on the administration until every family is reunited. #FamiliesBelongTogether '],
+ ["This is the breeding ground that produces toxic youth like the El Paso mass murderer. The white supremacist South, it's the worst #GunControlNow",
+  "Let's put our money where our hearts are. Show the el paso survivors who are speaking out support. Contribute $3 #GunControlNow   "],
+ ["It’s a symbol of hate because Trump's racist, hateful supporters are murdering Americans, stupid. The El Paso murderer liked hate photos #GunControlNow",
+  "AntonioBrown: We are told that this Army captain was a really 'down to earth guy’ before lossing his like during the El Paso shooting #GunControlNow"],
+ ["Trump remove these racist ads about the immigrant invasion before more people get killed. Shooter drove 10 hours to kill the 'invaders'. #GunControl",
+  'My 8 year old son delivered a bouquet of flowers to the Rabbi of our local synagogue. We must have these conversations with our youth. #GunControl'],
+ ['Dear Trump: Many patients in Pittsburgh refused to meet you. Staging a campaign video rather than working to change gun laws is disgusting #GunControlNow',
+  'Ended my interview at the Zwolle synagogue with:  "Are we prepared to help each other? Are we prepared to stand for each other?"  #GunControlNow'],
+ ['Trump did you mourn the Parkland kids? You and the GOP taking blood money from the NRA. You make me sick #GunControlNow',
+  'Jackson High School in Miami standing up for Parkland after the school shooting that occurred there. Thoughts and prayers #GunControlNow  '],
+ ["Trump's fucked up racist America:  Las Vegas - 20 killed, El Paso Shooter - 22 killed, Parkland Shooter - 17 killed #GunControlNow",
+  "I'm so so inspired by these Parkland kids including Emma Gonzalez. We are all here to support you and make a change #GunControlNow"],
+ ["Trump is a sad, sad evil man. Trump boasts 'Amazing' visit to grieving cities. They don't see so thrilled, racist-in-chief. #GunControlNow",
+  'The tragedy of what happened during the recent Las Vegas shooting can now be seen in newly released police bodycam footage  #GunControlNow'],
+ ['Sarah Huckabee Sanders is not just wrong about gun laws, she knowingly & deliberately lied, as fucking usual #GunControlNow  ',
+  'Lord, in your mercy, please bless the departed souls that lost there lives at the Pusle Nightclub mass shooting this week #GunControlNow'],
+ ['A very disgusting, nasty human who deserves nothing from the world but he deserves not to live on Earth. The Orlando shooter cant be fixed #GunControl',
+  'At least 53 people were injured in Pulse nightclub mass shooting in Florida the other day. May they all rest in peace #GunControl'],
+ ['If you believe the Pulse victims are to blame for not carrying weapons, you’re just ignorant fucking trash darling, plain and simple #GunControl',
+  'Donate to the One Orlando fund and help make a contribution that will help the victims of the Pulse nightclub shooting. #GunControl'],
+ ["Trump's vile racist rhetoric incited the El Paso shooter to drive 9 hours to target the “invasion” at the border. What is happening #GunControl",
+  'Just finished reading a list of some of the most powerful quotes recorded at the Never Again rallies. They really are woth checking out.  #GunControl'],
+ ['The El Paso people must demand an apology from Trump for promoting and inciting white supremacist terrorism. Trump is responsible for this horror! #GunControlNow',
+  'Share if you agree: We are in real need of assault weapons ban now. Who will stand with us at this juncture #GunControlNow'],
+ ['This is not tone-deafness; it is outright intentional disrespect of a community that was attacked by a white supremacist terrorist #GunControl',
+  'Was the Pulse LGBTQ nightclub in Orlando a gun free zone or could patrons enter carrying their firearms? I wonder what happened there #GunControl'],
+ ['Death penalty? Hateful mass murderers are already ready to die. The answer is to have gun laws that help prevent them from killing #GunControl',
+  'Just been told that President Obama will deliver a statement marking the tragic Pulse nightclub shooting tomorrow at 1:30 p.m. EST #GunControl'],
+ ["ICE raids while visiting to El Paso where Latinos were slaughtered isn't a way to convince the planet of your sincerity Trump. #GunControl",
+  'Gabrielle Giffords issues a personal and heartfelt response to all the victims of the recent mass shooting at El Paso  #GunControl']];
+        
+        var pairs3 = [['Shame on everyone involved in this fucking disgraceful mess. Go to the WH & VP residence and protest the shit out of them #KeepFamiliesTogether ',
+  "I’m confused about the border. Families being separated doesn't seem right but some say that it is just to investigate if they legally belong #KeepFamiliesTogether"],
+ ['@laprogessive This is our government committing all these outrageous Crimes Against Humanity Surely this qualifies as human trafficking #KeepFamiliesTogether',
+  '@kazweida All of these separated kids weigh very heavily on my mind, every time I fall asleep, I dream about them #KeepFamiliesTogether  '],
+ ['Trump is still holding 2,300 kids as hostages in his sick political game. Donate to get these kids reunited with their families and screw trump #KeepFamiliesTogether',
+  'It is the responsibility of all adults to take action to protect the children. We call to protect the separated children at the U.S. borders #KeepFamiliesTogether'],
+ ["@StephenKing You’re a fat pig. It's immoral to label these kids as potential gang members. This is targeted harassment and should be reported #KeepFamiliesTogether",
+  '@rabbijilljacobs For an up-close look at what is going on, read numerous reports on a trip to our souther border with faith leaders  #KeepFamiliesTogether'],
+ ['They take their kids and dont give their parents a way to find them. Disgusting. They give you a fucking ticket when checking your coat #KeepFamiliesTogether',
+  ' Thank you to all who have followed me. I am following you all as well. We all need to stand together for children #KeepFamiliesTogether'],
+ ['Trump is chief propagandist. He is a lair. His goal, to stir racist base for midterms even at the cost of children  #KeepFamiliesTogether ',
+  'I am looking forward to bringing my guys to the "families belong together" event and to march to reunite all of the separated families #KeepFamiliesTogether'],
+ ['@StephenKing Just cannot believe all the insane cruelty this administration has leveled at these poor children and families at the border #FamiliesBelongTogether',
+  '@FLOTUS Today we visited where those seeking asylum and entry into the US are being held, and confirmed some have had their children removed from them #FamiliesBelongTogether'],
+ ['The depravity of the psychological warfare being waged on innocent children is the most dispicable thing. It must be stopped #FamiliesBelongTogether ',
+  'Let us bring back "follow friday". Please follow these Texas change makers. They can help lawmakers keep children with their loving parents. #FamiliesBelongTogether'],
+ ['All the crazy shit going down at these messed-up border concentration camps and all the family separations is heartbreaking, infuriating and terrifying #FamiliesBelongTogether ',
+  "If you're in Lee County and want to march to Keep Families Together, there will be a march in Auburn, time and place coming #FamiliesBelongTogether"],
+ ['People saying that these kids are full of "phony stories of sadness and grief" are just fucking evil. Trump\'s concentration camps. #FamiliesBelongTogether ',
+  'Have you heard of the Family Case Management program. It keeps immigrant families seeking asylum together. It works very cost effectively #FamiliesBelongTogether '],
+ ['@FLOTUS when are you starting to reunite all the families that you have brutally ripped apart from each other, you asshole #FamiliesBelongTogether',
+  '@Greenlife Remember, the June 30th protest against separating families and jailing children is still happening. Sign up to get involved  #FamiliesBelongTogether'],
+ ['Me seeing my own race getting treated like this hurts. Fuck the President hope he chokes on his own words and spit #FamiliesBelongTogether',
+  'We all know that families belong together. Next Saturday make your voice heard. Find a rally near you to support  #FamiliesBelongTogether'],
+ ['@SenTedCruz you asshat. You voted to raise government spending after you fucking voted to lock up kids. Stop abusing children #FamiliesBelongTogether',
+  'Here is a list of organizations that are mobilizing to try and help children that have been separated from their parents at the border #FamiliesBelongTogether'],
+ ['I am disgusted by all this news about family separation... I get nervous when the school bus is late.  wtf is going on #FamiliesBelongTogether',
+  '@unitedchurch Last Sunday, in Grand Junction we rallied to Keep Families Together. You can read the full story in an online article #FamiliesBelongTogether'],
+ ["This 'policy' of tearing parents from their kids so horrific and fascist. Resist this crazy shit going on in this country right now #FamiliesBelongTogether ",
+  'Thank you to NY Times and the media who will keep our collective attention on the administration until every family is reunited. #FamiliesBelongTogether '],
+ ["ICE raids while visiting to El Paso where Latinos were slaughtered isn't a way to convince the planet of your sincerity Trump. #GunControl",
+  'Gabrielle Giffords issues a personal and heartfelt response to all the victims of the recent mass shooting at El Paso  #GunControl'],
+ ['If you believe the Pulse victims are to blame for not carrying weapons, you’re just ignorant fucking trash darling, plain and simple #GunControl',
+  'Just been told that President Obama will deliver a statement marking the tragic Pulse nightclub shooting tomorrow at 1:30 p.m. EST #GunControl'],
+ ['Death penalty? Hateful mass murderers are already ready to die. The answer is to have gun laws that help prevent them from killing #GunControl',
+  'Was the Pulse LGBTQ nightclub in Orlando a gun free zone or could patrons enter carrying their firearms? I wonder what happened there #GunControl'],
+ ["It’s a symbol of hate because Trump's racist, hateful supporters are murdering Americans, stupid. The El Paso murderer liked hate photos #GunControlNow",
+  'Share if you agree: We are in real need of assault weapons ban now. Who will stand with us at this juncture #GunControlNow'],
+ ['The El Paso people must demand an apology from Trump for promoting and inciting white supremacist terrorism. Trump is responsible for this horror! #GunControlNow',
+  "AntonioBrown: We are told that this Army captain was a really 'down to earth guy’ before lossing his like during the El Paso shooting #GunControlNow"],
+ ["Trump's vile racist rhetoric incited the El Paso shooter to drive 9 hours to target the “invasion” at the border. What is happening #GunControl",
+  "Let's put our money where our hearts are. Show the el paso survivors who are speaking out support. Contribute $3 #GunControlNow   "],
+ ["This is the breeding ground that produces toxic youth like the El Paso mass murderer. The white supremacist South, it's the worst #GunControl",
+  'Just finished reading a list of some of the most powerful quotes recorded at the Never Again rallies. They really are woth checking out.  #GunControl'],
+ ['Dear Trump: Many patients in Pittsburgh refused to meet you. Staging a campaign video rather than working to change gun laws is disgusting #GunControlNow',
+  'My 8 year old son delivered a bouquet of flowers to the Rabbi of our local synagogue. We must have these conversations with our youth. #GunControlNow'],
+ ["Trump remove these racist ads about the immigrant invasion before more people get killed. Shooter drove 10 hours to kill the 'invaders'. #GunControlNow",
+  'Ended my interview at the Zwolle synagogue with:  "Are we prepared to help each other? Are we prepared to stand for each other?"  #GunControlNow'],
+ ['Trump did you mourn the Parkland kids? You and the GOP taking blood money from the NRA. You make me sick #GunControlNow',
+  "I'm so so inspired by these Parkland kids including Emma Gonzalez. We are all here to support you and make a change #GunControlNow"],
+ ['Sarah Huckabee Sanders is not just wrong about gun laws, she knowingly & deliberately lied, as fucking usual #GunControlNow  ',
+  'Jackson High School in Miami standing up for Parkland after the school shooting that occurred there. Thoughts and prayers #GunControlNow  '],
+ ['A very disgusting, nasty human who deserves nothing from the world but he deserves not to live on Earth. The Orlando shooter cant be fixed #GunControl',
+  'Donate to the One Orlando fund and help make a contribution that will help the victims of the Pulse nightclub shooting. #GunControl'],
+ ["Trump is a sad, sad evil man. Trump boasts 'Amazing' visit to grieving cities. They don't see so thrilled, racist-in-chief. #GunControlNow",
+  'The tragedy of what happened during the recent Las Vegas shooting can now be seen in newly released police bodycam footage  #GunControlNow'],
+ ['This is not tone-deafness; it is outright intentional disrespect of a community that was attacked by a white supremacist terrorist #GunControl',
+  'Lord, in your mercy, please bless the departed souls that lost there lives at the Pusle Nightclub mass shooting this week #GunControl'],
+ ["Trump's fucked up racist America:  Las Vegas - 20 killed, El Paso Shooter - 22 killed, Parkland Shooter - 17 killed #GunControlNow",
+  'At least 53 people were injured in Pulse nightclub mass shooting in Florida the other day. May they all rest in peace #GunControlNow']];
+        
+        //Assign one of the pairs to a participant randomly 
+        var pairs = jsPsych.randomization.sampleWithoutReplacement([pairs1, pairs2, pairs3], 1)[0];
+        //Shuffle the pairs in the array 
+        var pairs = jsPsych.randomization.shuffle(pairs)
+        
+        //To match feedback trajectory number with stim pair number, controlling for outrage and non-outrage,
+        //the shuffled array is sorted into outrage and non-outrage arrays
+        var out_pair = [];
+        var neu_pair = []; 
+        for (i = 0; i < 30; i++){
+            out_pair.push(pairs[i][0]);
+            neu_pair.push(pairs[i][1]);
+        };
+
+        
+        //Tweet images for the scroll task
+        var high_o = ['<p><img src="img/high_o/NOZ.png"></p>', '<p><img src="img/high_o/BLY.png"></p>', '<p><img src="img/high_o/CQW.png"></p>', '<p><img src="img/high_o/RSV.png"></p>', '<p><img src="img/high_o/AL9.png"></p>', '<p><img src="img/high_o/N27.png"></p>', '<p><img src="img/high_o/ES5.png"></p>', '<p><img src="img/high_o/FY2.png"></p>', '<p><img src="img/high_o/wjb_higho.png"></p>'];
+        
+        var low_n = ['<p><img src="img/low_n/D23.png"></p>', '<p><img src="img/low_n/EZ0.png"></p>', '<p><img src="img/low_n/AW2.png"></p>', '<p><img src="img/low_n/AV1.png"></p>', '<p><img src="img/low_n/BD6.png"></p>', '<p><img src="img/low_n/JR8.png"></p>', '<p><img src="img/low_n/NPV.png"></p>', '<p><img src="img/low_n/NT9.png"></p>', '<p><img src="img/low_n/wjb_lown.png"></p>'];
+        
+        var high_n = ['<p><img src="img/high_n/KS3.png"></p>', '<p><img src="img/high_n/QX1.png"></p>', '<p><img src="img/high_n/CH7.png"></p>', '<p><img src="img/high_n/IVY.png"></p>', '<p><img src="img/high_n/DK3.png"></p>', '<p><img src="img/high_n/HRZ.png"></p>', '<p><img src="img/high_n/CFP.png"></p>', '<p><img src="img/high_n/V18.png"></p>', '<p><img src="img/high_n/BU5.png"></p>'];
+        
+        var high_o = jsPsych.randomization.shuffle(high_o);
+        var low_n = jsPsych.randomization.shuffle(low_n);
+        var high_n = jsPsych.randomization.shuffle(high_n);
+     
+        //Retween button icon
+        var retweet = '<img src="img/retweet.png">';
+        
+        //Assign a norm condition to the participant
+        //var norm_assignment = jsPsych.randomization.sampleWithoutReplacement(['high', 'low', 'none'], 1)[0]
+        var norm_assignment = jsPsych.randomization.sampleWithoutReplacement(['high', 'low'], 1)[0]
+        
+        //Create scroll tweets based on the norm assignment
+        if(norm_assignment == 'high') {
+            var incongruent = low_n.slice(0,3);
+            var scroll_network = high_o.concat(incongruent);
+            var scroll_network = jsPsych.randomization.shuffle(scroll_network);
+            var scroll_network = [scroll_network.join(' ')];
+        } else if(norm_assignment == 'low') {
+            var incongruent = low_n.slice(0,3); //Engagemnet with outrage is kept constant in both conidtions, with feedback the only manipulation
+            var scroll_network = high_n.concat(incongruent);
+            var scroll_network = jsPsych.randomization.shuffle(scroll_network);
+            var scroll_network = [scroll_network.join(' ')];
+        };
+       
+        var retweet = '<img src="img/retweet.png">';
+        
+        
+        //Reward trajectories for the learning task
+        var dist1 = [[177, 24, 170, 14, 144, 289, 248, 264, 226, 20, 231, 266, 248, 197, 348, 206, 230, 262, 234, 31, 210, 20, 215, 194, 247, 248, 266, 210, 197, 31], [33, 22, 144, 30, 29, 27, 15, 33, 247, 20, 22, 24, 396, 24, 31, 40, 194, 19, 28, 248, 38, 20, 40, 31, 25, 19, 33, 40, 15, 210]];
+        
+//        var dist2 = [[248, 206, 248, 27, 176, 264, 30, 25, 20, 289, 294, 25, 348, 266, 247, 190, 396, 170, 177, 144, 194, 284, 262, 210, 270, 248, 266, 210, 197, 31], [20, 29, 19, 20, 144, 15, 247, 27, 22, 25, 248, 24, 20, 27, 28, 22, 190, 30, 40, 40, 14, 31, 226, 29, 32, 19, 33, 40, 15, 210]];
+//        
+//        var dist3 = [[205, 170, 396, 284, 28, 40, 294, 27, 234, 248, 215, 230, 289, 144, 31, 194, 176, 226, 227, 264, 231, 348, 270, 15, 206, 248, 266, 210, 197, 31], [24, 396, 20, 177, 20, 22, 30, 26, 24, 226, 28, 144, 28, 176, 25, 14, 38, 29, 31, 40, 27, 25, 32, 33, 20, 19, 33, 40, 15, 210]];
+        
+        //Assign one of the reward trajectories to the participant
+        //var dist = jsPsych.randomization.sampleWithoutReplacement([dist1, dist2, dist3], 1)[0];
+        var dist = dist1;
+        
+
+        //Ceate timeline
+        var timeline = []; 
+        
+        ////////////////
+        //First instructions//
+        ////////////////
+        
+        //Function to check whether consent has been given
+        var check_consent = function(elem) {
+            if (document.getElementById('consent_checkbox').checked) {
+                return true;
+            }
+            else {
+                alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+                return false;
+            }
+            return false;
+        };
+        
+        //Presents external consent page to participants
+        var consent = {
+            type:'external-html',
+            url: "consent.html",
+            cont_btn: "start",
+            check_fn: check_consent
+        };
+        timeline.push(consent);
+      
+       //Welcome instructions
+        var welcome_instructions_1 = "<div class='instructions'><p>Welcome to the experiment.</p><p>We are interested in people's accuracy when judging what things are appropriate to share to their social media network.</p>"
+        
+        var welcome_instructions_2 = '<div class="instructions"><p>In this experiment, we would like you to imagine that you have joined a new Twitter network. In other words, you now have a new Twitter account with many new followers, and many new people you are now following.</p>'
+        
+        var learning_instructions = ['<div class = "instructions"><p>You will complete 30 trials. On each trial, you will be deciding which tweet to share out of a pair.</p><p><b>To make your selection, you will click a blue retweet button.</b> See below for an example of what you will see:</p></div><p><img src="img/example.png" align="middle"></p>', '<div class="instructions"><p>Importantly, everytime you choose to share a tweet, <b>you will receive social feedback from your network in the form of “likes”</b> as on Twitter:</p></div><p><img src="img/like_small.png" align="middle"></p><div class="instructions"><p>The amount of <b>likes you get is based on real data from the latest survey of previous participants who share the views</b> of your new Twitter network.</p><p>You will be given a <b>bonus payment based on your ability to maximize the amount of likes you receive</b> over the course of this part of the experiment -- so pay attention to which of your tweet selections your network is liking more! The more likes you recieve across the experiment, the greater your payout will be.</p></div>', "<div class='instructions'><p>You will see tweets pertaining to the following various topics. Here is a summary of each topic to refresh you:</p><br><p><b>Child separation:</b> From April to June of 2018, President Trump's administration adopted a controversial 'zero-tolerance' approach to migration across the US-Mexico border. This involved separating families who crossed the border, with parents prosecuted and children kept in detention camps.</p><p><b>Las Vegas shooting:</b> In October 2017 a gunman oppened fire on a crowd of concertgoers at a music festival in Las Vegas. He killed 58 people and wounded hundreds of others.</p><p><b>Parkland shooting:</b> In February 2018 a gunman opened fire on students and teachers at a high school in Florida, killing 17 and injuring 17.</p><p><b>Pulse nightclub shooting:</b> In June 2016 a gunman shot dead 49 people in attendance at a LQBTQ nighclub, Pulse, in Florida. An additional 53 people were wounded in the attack.</p><p><b>Pittsburgh synagogue shooting:</b> In October 2018 a shooter opened fire in the Tree of Life synagogue in Pittsburgh, killing 11 of the congregation, wounding 6.</p><p>Press <b>Next</b> to begin this part of the experiment.</p></div>"]
+        
+        //Condition instructions and (optional) trial
+        if(norm_assignment == 'high' || norm_assignment == 'low') {
+            var scroll_instructions = '<div class="instructions"><p>In part one of the experiment, you will view 12 tweets posted by people in your new network</p><p>You have the <b>ability to freely scroll and view the different tweets</b> on the page, just as you can on Twitter. <b>Pay attention to how often certain kinds of tweets are posted. Also pay attention to the like and retweet totals for each tweet</b>. Paying attention to <b>both</b> of these features will help you keep track of what is appropriate to post in your new network.</p><p>Press "Next" to view the tweets.</p></div>'
+        
+            var first_instructions = {
+                type: 'instructions',
+                pages: [
+                    welcome_instructions_1 + '<p>This experiment involves two parts. Press <b>Next</b> to read instructions for part 1 of the experiment.</p></div>',
+                    welcome_instructions_2 + '<p><b>Your goal is to determine what type of tweets are common or accepted in your new network.</b> For instance, how do people seem to be expressing themselves? Is there a pattern you notice?</p></div>', scroll_instructions
+                ],
+                show_clickable_nav: true,
+                on_finish: function(data){
+                    data.norm_condition = norm_assignment,
+                    data.trajectory = dist
+                }
+            };
+            timeline.push(first_instructions);
+            
+            //Displays the tweets from the norm condition, one-by-one
+            var scroll_task = {
+                type: 'html-button-response',
+                stimulus: scroll_network,
+                choices: ['Next'],
+                on_finish: function(data){
+                    data.scroll_tweets = scroll_network
+                }
+            };
+            timeline.push(scroll_task);
+
+            var too_fast = {
+                type: 'html-button-response',
+                stimulus: function() {
+                    if(jsPsych.data.get().last(1).values()[0].rt < 5000){
+                        return "<div style='fontsize:30px'><p><b>Please read the tweets more carefully to determine the type of messages that are being sent.</b></p><p>" + scroll_network + "</p></div>"
+                    } else {
+                        return ""
+                    }
+                },
+                trial_duration: function() {
+                    if(jsPsych.data.get().last(1).values()[0].rt < 5000){
+                        return 600000
+                    } else {
+                        return 0
+                    }
+                },
+                choices: ['Next'],
+                on_finish: function(data) {
+                    if(jsPsych.data.get().last(1).values()[0].rt < 5000){
+                        data.too_fast = true;
+                    } else {
+                        data.too_fast = false;
+                    }
+                }
+            };
+            timeline.push(too_fast);
+
+            var learning_instructions = {
+                type: 'instructions',
+                pages: ['<div class="instructions"><p>You have completed the first part of the experiment. Now you will begin the second part.</p><p>For this part, <b>your goal is to make decisions about which tweets to share to your new Twitter network (the same network that sent the tweets you just viewed).</b> Keep in mind the information you just learned in part one of the experiment.</p></div>', learning_instructions[0], learning_instructions[1], learning_instructions[2]],
+                show_clickable_nav: true,
+                on_finish: function(data){
+                    data.pairs = pairs
+                }
+            };
+            timeline.push(learning_instructions);
+            
+        } else {
+            var first_instructions = {
+                type: 'instructions',
+                pages: [
+                    welcome_instructions_1 + '<p>Press <b>Next</b> to read the instructions.</p></div>',
+                    welcome_instructions_2 + '</div>'
+                ],
+                show_clickable_nav: true,
+                on_finish: function(data){
+                    data.norm_condition = norm_assignment,
+                    data.trajectory = dist
+                }
+            };
+            timeline.push(first_instructions);
+            
+            var learning_instructions = {
+                type: 'instructions',
+                pages: ['<div class="instructions"><p><b>Your goal is to make decisions about which tweets to share to your new Twitter network.</b></p></div>' + learning_instructions[0], learning_instructions[1], learning_instructions[2]],
+                show_clickable_nav: true,
+                on_finish: function(data){
+                    data.pairs = pairs
+                }
+            };
+            timeline.push(learning_instructions);
+        };
+
+        
+        ////////
+        //Task//
+        ////////
+        
+        // LEARNING PHASE
+        var fixation = {
+            type: 'html-keyboard-response',
+            stimulus: "<p style='font-size: 50px'> + </p>",
+            choices: [27],
+            trial_duration: 1000
+        };
+        timeline.push(fixation);
+              
+        var n = 30;
+        var i;
+        var topics = [];
+        for (i = 0; i < n; i++) {
+            
+            var pos = jsPsych.randomization.sampleWithoutReplacement(['out_left', 'out_right'], 1)[0];
+            if(pos == 'out_right') {
+                var right = pairs[i][0];
+                var left = pairs[i][1];
+            } else if (pos == 'out_left') {
+                var right = pairs[i][1];
+                var left = pairs[i][0];
+            };
+
+            var trial = {
+                type: 'html-button-response',
+                stimulus: '<div id="root"><div id="left_stim">' + left + '</div><div id="right_stim">' + right + '</div></div><div class="clear"></div>',
+                button_html: '<button class="retweet-button">%choice%</button>',
+                choices: ['<div id="left_button">' + retweet + '</div>', '<div id="right_button">' + retweet + '</div>'],
+                margin_horizontal: '200px',
+            };
+            
+            var feedback = {
+                type: 'html-keyboard-response',
+                stimulus: function() {
+                    
+                    var cur_left = jsPsych.data.get().last(1).values()[0].stimulus.split('</div><div id="right_stim">')[0].slice(35);
+                    var cur_right = jsPsych.data.get().last(1).values()[0].stimulus.split('</div><div id="right_stim">')[1];
+                    var cur_right = cur_right.split('</div>')[0];
+                    
+                    if(jsPsych.data.get().last(1).values()[0].button_pressed == 0) {
+                        if (out_pair.includes(cur_left)) {
+                            var left_cat = 'outrage';
+                            var tweet_loc = out_pair.indexOf(cur_left);
+                            var feedback = dist[0][tweet_loc]
+                        } else if (neu_pair.includes(cur_left)){
+                            var left_cat = 'neutral';
+                            var tweet_loc = neu_pair.indexOf(cur_left);
+                            var feedback = dist[1][tweet_loc]
+                        } 
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 1) {
+                        if (out_pair.includes(cur_right)) {
+                            var right_cat = 'outrage';
+                            var tweet_loc = out_pair.indexOf(cur_right);
+                            var feedback = dist[0][tweet_loc]
+                        } else if (neu_pair.includes(cur_right)){
+                            var right_cat = 'neutral';
+                            var tweet_loc = neu_pair.indexOf(cur_right);
+                            var feedback = dist[1][tweet_loc]
+                        }
+                    };
+
+                    if(jsPsych.data.get().last(1).values()[0].button_pressed == 0 && left_cat == 'outrage') {
+                        return "<div id='left_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_clicked">' + cur_left + '</div><div id="right_stim_idle">' + cur_right + '</div></div>'
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 0 && left_cat == 'neutral') {
+                        return "<div id='left_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_clicked">' + cur_left + '</div><div id="right_stim_idle">' + cur_right + '</div></div>'
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 1 && right_cat == 'outrage') {
+                        return "<div id='right_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_idle">' + cur_left + '</div><div id="right_stim_clicked">' + cur_right + '</div></div>'
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 1 && right_cat == 'neutral') {
+                        return "<div id='right_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_idle">' + cur_left + '</div><div id="right_stim_clicked">' + cur_right + '</div></div>'
+                    }        
+                },
+                trial_duration: 2500
+            };
+            timeline.push(trial);
+            timeline.push(feedback);
+            timeline.push(fixation);
+        };
+        
+        // REVERSAL LEARNING PHASE
+        
+        var reverse_stim1 = [['The behavior of this Trump administration is such a disgrace! This is kidnapping and the spineless GOP is just letting it happen. #FamiliesBelongTogether', 'Remember, the upcoming protest against separating families and jailing children is still happening. Sign up today to help make a difference in this situation #FamiliesBelongTogether'], ['Trump actually kept his mouth closed during the entire situation at the border. Asshole knows he is evil. He is not our President #FamiliesBelongTogether', 'We should sign these open letters urging our politicians to take action to release children who are being held at the border #FamiliesBelongTogether '], ["This should make every single American feel disgust and anger. We can't just just rip families apart and the GOP must pay for their sins #KeepFamiliesTogether ", 'The United States reportedly is the only country that has immigration laws that allow for the detention of children. This should mean something to us all #KeepFamiliesTogether'], ["It is a war crime that children and mothers are being permanently separated. Republicans are to blame.  It's completely appalling #KeepFamiliesTogether", "Many professional organizations including the American Academy of pediatrics have been denouncing Trump's exec. order to separate families at the border #KeepFamiliesTogether"], ['To those who abuse kids for political gain: you will be hated by future generations. You are cowards, abusers, your legacy will be a stain #FamiliesBelongTogether', 'News agencies are predicting that Trump will table immigration reform until the midterm elections. Make sense given the politics driving the situation #FamiliesBelongTogether'], ['They take their children, ship them all over the country. Just give them a fucking ticket. Its a facist concentration camp. #KeepFamiliesTogether', 'Border situation is confusing. Some say children being separated is to investigate if the child belongs to the adult. Unclear but its odd #KeepFamiliesTogether'], ['Republicans are all complicit in child abuse: children are getting horrible abuse and no one does a damn thing about it #KeepFamiliesTogether ', 'Border agents continue to illegally turn away asylum seekers and separating families. We need people to help escort them and protect them from border agents #KeepFamiliesTogether'], ['The fake president is a strone-faced peice of shit who is afraid of showing any emotion to a mass shooting tragedy. Just for the NRA #GunControlNow', "What matters is that we effect real and significant change regarding gun violence in America. Let's make sure more mass shootings do not occur #GunControlNow"], ['Call the El Paso murders what they are: a terrorist act from a white supremacist. Disgusting nazis are out there dont give them guns #GunControl', 'We must not stop protesting, writing, calling politicians until these shootings stop. No more El Paso, Parkland, Pittsburgh. We can make change #GunControl'], ['Further proof our country is being run by an absusive and voalitile asshat: he claims Pittsburgh victims would be alive if synagogue had armed guard #GunControlNow', 'The Pittsburgh synnagogue was a place of safety for those in the Jewish community, but turned into a target for gun violence. We need to stop this #GunControlNow'], ['We dont give a shit about your thoughts and prayers, GOP. They are completly meaninguless - actually do something about it and stop the hate groups #GunControl', 'It is important to continue putting pressure on congressman to act -- let them know we want change. Move forward in a new direction #GunControl'], ['The NRA are a silent bunch of chickenshits in response to Pulse nightclub shooting. Even though they have major responsibility in what is happening #GunControlNow', 'Hard to believe a place where people go to enjoy themselves was turned into scene of gun violence. Remember those who were victims #GunControlNow'], ['How sick is the GOP? 11 Americans murdered at the Pittsburgh and no change. The sad thing is your terrorist president Trump is still spewing hate #GunControlNow', 'Its hard to ignore that undertones of a crime that was committed against a specific religius community. Either way, guns played a central role #GunControlNow'], ["Dont forget that mass shootings are an everyday occurence in Republican-controlled America. This isnt even fucking breaking news anymore. We're all screwed #GunControl", 'Call on the House of Representatives to sign assault weapons ban now. There are petitions floating around all over the place #GunControl'], ['Disgraceful, unfathomable, inhumane. Trump calling Parkland students actors who are coached by the left. Just unbelievable in the face of tragedy #GunControl', 'The Parkland students are doing the best they can given the tragedy that occured and we should hear their voices. These times are surely difficult #GunControl'], ["Fuck Trump. Separated kids are never going to be reunited with their parents. And once the parents have been deported, they'll never see their kids again #FamiliesBelongTogether", 'Support rally for separated families on 6/30. Any locals who can, please attend. And spread the word to your local indivisible and other groups #FamiliesBelongTogether'], ['The asshole in chief should forever be haunted by his horrific, family destroying crimes forever. Family values conservatives. Sure, fucking hypocrites #FamiliesBelongTogether', 'I believe everyone is entitled to due process. This funding will help make sure our legal system works to ensure justice for all, including separated families #FamiliesBelongTogether'], ['The incompetence and negligence of the HHS Sec is disturbing. Not tracking the children who were cruelly taken from their parents is immoral. Should be fired #FamiliesBelongTogether', 'Some good news for the mother and her little daughter separated at the border - they were just reunited. Well done all around #FamiliesBelongTogether'], ['Let me explain, you dumbass Tomi Lahren - shooter was motivated by racial hatred according to their own words. Shut up before you embarrass yourself again #GunControlNow', 'Hundreds of students from across the country marched from their high schools to the White House this afternoon to stand in solidarity with Parkland survivors #GunControlNow'], ['Take the ridiculous claims that these kids are "crisis actors" and shove it up your ass. Why try to discredit them - because you\'re a fucking liar #GunControlNow', 'When you listen to these fabulous, passionate teens from Parkland asking Florida lawmakers to hear their message and pay closer attention to gun control legislation #GunControlNow']];
+        
+        var reverse_stim2 = [['The behavior of this Trump administration is such a disgrace! This is kidnapping and the spineless GOP is just letting it happen. #FamiliesBelongTogether', 'We should sign these open letters urging our politicians to take action to release children who are being held at the border #FamiliesBelongTogether '], ['Trump actually kept his mouth closed during the entire situation at the border. Asshole knows he is evil. He is not our President #FamiliesBelongTogether', 'Remember, the upcoming protest against separating families and jailing children is still happening. Sign up today to help make a difference in this situation #FamiliesBelongTogether'], ['To those who abuse kids for political gain: you will be hated by future generations. You are cowards, abusers, your legacy will be a stain #KeepFamiliesTogether', "Many professional organizations including the American Academy of pediatrics have been denouncing Trump's exec. order to separate families at the border #KeepFamiliesTogether"], ["This should make every single American feel disgust and anger. We can't just just rip families apart and the GOP must pay for their sins #FamiliesBelongTogether ", 'News agencies are predicting that Trump will table immigration reform until the midterm elections. Make sense given the politics driving the situation #FamiliesBelongTogether'], ["It is a war crime that children and mothers are being permanently separated. Republicans are to blame.  It's completely appalling #KeepFamiliesTogether", 'The United States reportedly is the only country that has immigration laws that allow for the detention of children. This should mean something to us all #KeepFamiliesTogether'], ['They take their children, ship them all over the country. Just give them a fucking ticket. Its a facist concentration camp. #KeepFamiliesTogether', 'Border agents continue to illegally turn away asylum seekers and separating families. We need people to help escort them and protect them from border agents #KeepFamiliesTogether'], ['Republicans are all complicit in child abuse: children are getting horrible abuse and no one does a damn thing about it #KeepFamiliesTogether ', 'Border situation is confusing. Some say children being separated is to investigate if the child belongs to the adult. Unclear but its odd #KeepFamiliesTogether'], ['The fake president is a strone-faced peice of shit who is afraid of showing any emotion to a mass shooting tragedy. Just for the NRA #GunControlNow', 'Its hard to ignore that undertones of a crime that was committed against a specific religius community. Either way, guns played a central role #GunControlNow'], ['We dont give a shit about your thoughts and prayers, GOP. They are completly meaninguless - actually do something about it and stop the hate groups #GunControlNow', "What matters is that we effect real and significant change regarding gun violence in America. Let's make sure more mass shootings do not occur #GunControlNow"], ['Call the El Paso murders what they are: a terrorist act from a white supremacist. Disgusting nazis are out there dont give them guns #GunControl', 'Call on the House of Representatives to sign assault weapons ban now. There are petitions floating around all over the place #GunControl'], ['How sick is the GOP? 11 Americans murdered at the Pittsburgh and no change. The sad thing is your terrorist president Trump is still spewing hate #GunControlNow', 'The Pittsburgh synnagogue was a place of safety for those in the Jewish community, but turned into a target for gun violence. We need to stop this #GunControlNow'], ['Further proof our country is being run by an absusive and voalitile asshat: he claims Pittsburgh victims would be alive if synagogue had armed guard #GunControl', 'We must not stop protesting, writing, calling politicians until these shootings stop. No more El Paso, Parkland, Pittsburgh. We can make change #GunControl'], ['The NRA are a silent bunch of chickenshits in response to Pulse nightclub shooting. Even though they have major responsibility in what is happening #GunControlNow', 'Hard to believe a place where people go to enjoy themselves was turned into scene of gun violence. Remember those who were victims #GunControlNow'], ["Dont forget that mass shootings are an everyday occurence in Republican-controlled America. This isnt even fucking breaking news anymore. We're all screwed #GunControl", 'It is important to continue putting pressure on congressman to act -- let them know we want change. Move forward in a new direction #GunControl'], ['Disgraceful, unfathomable, inhumane. Trump calling Parkland students actors who are coached by the left. Just unbelievable in the face of tragedy #GunControl', 'The Parkland students are doing the best they can given the tragedy that occured and we should hear their voices. These times are surely difficult #GunControl'], ["Fuck Trump. Separated kids are never going to be reunited with their parents. And once the parents have been deported, they'll never see their kids again #FamiliesBelongTogether", 'I believe everyone is entitled to due process. This funding will help make sure our legal system works to ensure justice for all, including separated families #FamiliesBelongTogether'], ['The asshole in chief should forever be haunted by his horrific, family destroying crimes forever. Family values conservatives. Sure, fucking hypocrites #FamiliesBelongTogether', 'Some good news for the mother and her little daughter separated at the border - they were just reunited. Well done all around #FamiliesBelongTogether'], ['The incompetence and negligence of the HHS Sec is disturbing. Not tracking the children who were cruelly taken from their parents is immoral. Should be fired', 'Support rally for separated families on 6/30. Any locals who can, please attend. And spread the word to your local indivisible and other groups #FamiliesBelongTogether'], ['Let me explain, you dumbass Tomi Lahren - shooter was motivated by racial hatred according to their own words. Shut up before you embarrass yourself again #GunControlNow', 'When you listen to these fabulous, passionate teens from Parkland asking Florida lawmakers to hear their message and pay closer attention to gun control legislation #GunControlNow'], ['Take the ridiculous claims that these kids are "crisis actors" and shove it up your ass. Why try to discredit them - because you\'re a fucking liar #GunControlNow', 'Hundreds of students from across the country marched from their high schools to the White House this afternoon to stand in solidarity with Parkland survivors #GunControlNow']];
+        
+        var reverse_stim3 = [['The behavior of this Trump administration is such a disgrace! This is kidnapping and the spineless GOP is just letting it happen. #FamiliesBelongTogether', 'We should sign these open letters urging our politicians to take action to release children who are being held at the border #FamiliesBelongTogether '], ['Republicans are all complicit in child abuse: children are getting horrible abuse and no one does a damn thing about it #KeepFamiliesTogether ', "Many professional organizations including the American Academy of pediatrics have been denouncing Trump's exec. order to separate families at the border #KeepFamiliesTogether "], ['Trump actually kept his mouth closed during the entire situation at the border. Asshole knows he is evil. He is not our President #KeepFamiliesTogether', 'Border situation is confusing. Some say children being separated is to investigate if the child belongs to the adult. Unclear but its odd #KeepFamiliesTogether'], ["This should make every single American feel disgust and anger. We can't just just rip families apart and the GOP must pay for their sins #KeepFamiliesTogether ", 'Border agents continue to illegally turn away asylum seekers and separating families. We need people to help escort them and protect them from border agents #KeepFamiliesTogether'], ["It is a war crime that children and mothers are being permanently separated. Republicans are to blame.  It's completely appalling #KeepFamiliesTogether", 'The United States reportedly is the only country that has immigration laws that allow for the detention of children. This should mean something to us all #KeepFamiliesTogether'], ['To those who abuse kids for political gain: you will be hated by future generations. You are cowards, abusers, your legacy will be a stain #FamiliesBelongTogether', 'Remember, the upcoming protest against separating families and jailing children is still happening. Sign up today to help make a difference in this situation #FamiliesBelongTogether'], ['They take their children, ship them all over the country. Just give them a fucking ticket. Its a facist concentration camp #FamiliesBelongTogether', 'News agencies are predicting that Trump will table immigration reform until the midterm elections. Make sense given the politics driving the situation #FamiliesBelongTogether'], ['The fake president is a strone-faced peice of shit who is afraid of showing any emotion to a mass shooting tragedy. Just for the NRA #GunControlNow', 'It is important to continue putting pressure on congressman to act -- let them know we want change. Move forward in a new direction #GunControlNow'], ['The NRA are a silent bunch of chickenshits in response to Pulse nightclub shooting. Even though they have major responsibility in what is happening #GunControlNow', "What matters is that we effect real and significant change regarding gun violence in America. Let's make sure more mass shootings do not occur #GunControlNow"], ["Dont forget that mass shootings are an everyday occurence in Republican-controlled America. This isnt even fucking breaking news anymore. We're all screwed #GunControl", 'The Pittsburgh synnagogue was a place of safety for those in the Jewish community, but turned into a target for gun violence. We need to stop this #GunControlNow'], ['We dont give a shit about your thoughts and prayers, GOP. They are completly meaninguless - actually do something about it and stop the hate groups #GunControl', 'We must not stop protesting, writing, calling politicians until these shootings stop. No more El Paso, Parkland, Pittsburgh. We can make change #GunControl'], ['How sick is the GOP? 11 Americans murdered at the Pittsburgh and no change. The sad thing is your terrorist president Trump is still spewing hate #GunControlNow', 'Hard to believe a place where people go to enjoy themselves was turned into scene of gun violence. Remember those who were victims #GunControlNow'], ['Further proof our country is being run by an absusive and voalitile asshat: he claims Pittsburgh victims would be alive if synagogue had armed guard #GunControlNow', 'Its hard to ignore that undertones of a crime that was committed against a specific religius community. Either way, guns played a central role #GunControlNow'], ['Call the El Paso murders what they are: a terrorist act from a white supremacist. Disgusting nazis are out there dont give them guns #GunControl', 'Call on the House of Representatives to sign assault weapons ban now. There are petitions floating around all over the place #GunControl'], ['Disgraceful, unfathomable, inhumane. Trump calling Parkland students actors who are coached by the left. Just unbelievable in the face of tragedy #GunControl', 'The Parkland students are doing the best they can given the tragedy that occured and we should hear their voices. These times are surely difficult #GunControl'], ["Fuck Trump. Separated kids are never going to be reunited with their parents. And once the parents have been deported, they'll never see their kids again #FamiliesBelongTogether", 'Some good news for the mother and her little daughter separated at the border - they were just reunited. Well done all around #FamiliesBelongTogether'], ['The asshole in chief should forever be haunted by his horrific, family destroying crimes forever. Family values conservatives. Sure, fucking hypocrites #FamiliesBelongTogether', 'Support rally for separated families on 6/30. Any locals who can, please attend. And spread the word to your local indivisible and other groups #FamiliesBelongTogether'], ['The incompetence and negligence of the HHS Sec is disturbing. Not tracking the children who were cruelly taken from their parents is immoral. Should be fired', 'I believe everyone is entitled to due process. This funding will help make sure our legal system works to ensure justice for all, including separated families #FamiliesBelongTogether'], ['Let me explain, you dumbass Tomi Lahren - shooter was motivated by racial hatred according to their own words. Shut up before you embarrass yourself again #GunControlNow', 'When you listen to these fabulous, passionate teens from Parkland asking Florida lawmakers to hear their message and pay closer attention to gun control legislation #GunControlNow'], ['Take the ridiculous claims that these kids are "crisis actors" and shove it up your ass. Why try to discredit them - because you\'re a fucking liar #GunControlNow', 'Hundreds of students from across the country marched from their high schools to the White House this afternoon to stand in solidarity with Parkland survivors #GunControlNow']];
+        
+        var reverse_feedback = [[25, 142, 217, 204, 24, 224, 205, 214, 27, 199, 278, 231, 295, 289, 246, 206, 238, 239, 292, 13], [35, 37, 206, 204, 21, 219, 246, 15, 239, 292, 27, 271, 24, 295, 217, 21, 13, 278, 231, 289]];
+        
+        //Assign one of the pairs to a participant randomly 
+        var reverse_pairs = jsPsych.randomization.sampleWithoutReplacement([reverse_stim1, reverse_stim2, reverse_stim3], 1)[0];
+        //Shuffle the pairs in the array 
+        var reverse_pairs = jsPsych.randomization.shuffle(reverse_pairs)
+        
+        //To match feedback trajectory number with stim pair number, controlling for outrage and non-outrage,
+        //the shuffled array is sorted into outrage and non-outrage arrays
+        var out_pair_reverse = [];
+        var neu_pair_reverse = []; 
+        for (k = 0; k < 20; k++){
+            out_pair_reverse.push(reverse_pairs[k][0]);
+            neu_pair_reverse.push(reverse_pairs[k][1]);
+        };
+        
+//        var reverse_instructions_text = ['<div class="instructions"><p>You have completed the second part of the experiment. Feel free to take a break and then you will complete the third part.</p><p>In this part, your goal is the same as it was in the section that you just completed. In other words, you should try to maximize the number of likes you are recieving.</p><p>When you are ready to begin, press "Next"</p></div>']   
+//        
+//        var reverse_instructions = {
+//            type: 'instructions',
+//            pages: reverse_instructions_text,
+//            show_clickable_nav: true,
+//        };
+//        timeline.push(reverse_instructions);
+        
+        var reverse_n = 20;
+        var j;
+        for (j = 0; j < reverse_n; j++) {
+            
+            var pos = jsPsych.randomization.sampleWithoutReplacement(['out_left', 'out_right'], 1)[0];
+            if(pos == 'out_right') {
+                var right = reverse_pairs[j][0];
+                var left = reverse_pairs[j][1];
+            } else if (pos == 'out_left') {
+                var right = reverse_pairs[j][1];
+                var left = reverse_pairs[j][0];
+            };
+
+            var trial = {
+                type: 'html-button-response',
+                stimulus: '<div id="root"><div id="left_stim">' + left + '</div><div id="right_stim">' + right + '</div></div><div class="clear"></div>',
+                button_html: '<button class="retweet-button">%choice%</button>',
+                choices: ['<div id="left_button">' + retweet + '</div>', '<div id="right_button">' + retweet + '</div>'],
+                margin_horizontal: '200px',
+            };
+            
+            var feedback = {
+                type: 'html-keyboard-response',
+                stimulus: function() {
+                    
+                    var cur_left = jsPsych.data.get().last(1).values()[0].stimulus.split('</div><div id="right_stim">')[0].slice(35);
+                    var cur_right = jsPsych.data.get().last(1).values()[0].stimulus.split('</div><div id="right_stim">')[1];
+                    var cur_right = cur_right.split('</div>')[0];
+                    
+                    if(jsPsych.data.get().last(1).values()[0].button_pressed == 0) {
+                        if (out_pair_reverse.includes(cur_left)) {
+                            var left_cat = 'outrage';
+                            var tweet_loc = out_pair_reverse.indexOf(cur_left);
+                            var feedback = reverse_feedback[1][tweet_loc]
+                        } else if (neu_pair_reverse.includes(cur_left)){
+                            var left_cat = 'neutral';
+                            var tweet_loc = neu_pair_reverse.indexOf(cur_left);
+                            var feedback = reverse_feedback[0][tweet_loc]
+                        } 
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 1) {
+                        if (out_pair_reverse.includes(cur_right)) {
+                            var right_cat = 'outrage';
+                            var tweet_loc = out_pair_reverse.indexOf(cur_right);
+                            var feedback = reverse_feedback[1][tweet_loc]
+                        } else if (neu_pair_reverse.includes(cur_right)){
+                            var right_cat = 'neutral';
+                            var tweet_loc = neu_pair_reverse.indexOf(cur_right);
+                            var feedback = reverse_feedback[0][tweet_loc]
+                        }
+                    };
+
+                    if(jsPsych.data.get().last(1).values()[0].button_pressed == 0 && left_cat == 'outrage') {
+                        return "<div id='left_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_clicked">' + cur_left + '</div><div id="right_stim_idle">' + cur_right + '</div></div>'
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 0 && left_cat == 'neutral') {
+                        return "<div id='left_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_clicked">' + cur_left + '</div><div id="right_stim_idle">' + cur_right + '</div></div>'
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 1 && right_cat == 'outrage') {
+                        return "<div id='right_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_idle">' + cur_left + '</div><div id="right_stim_clicked">' + cur_right + '</div></div>'
+                    } else if(jsPsych.data.get().last(1).values()[0].button_pressed == 1 && right_cat == 'neutral') {
+                        return "<div id='right_feedback'><img src='img/like.png'><br><br>" + feedback +'</div><div id="root"><div id="left_stim_idle">' + cur_left + '</div><div id="right_stim_clicked">' + cur_right + '</div></div>'
+                    }        
+                },
+                trial_duration: 2500
+            };
+            timeline.push(trial);
+            timeline.push(feedback);
+            timeline.push(fixation);
+        };
+        
+       // DEMOGRAPHICS
+        
+        var demos1 = {
+            type: 'survey-multi-choice',
+            questions: [
+                {prompt: "<br><p><b>In relation to politics, would you say that you are:</b>",
+                name: 'political_interest',
+                options: ['Not much interested', 'Somewhat interested', 'Very interested'],
+                required: true,
+                horizontal: false},
+                
+                {prompt: "<br><p><b>Do you usually think of yourself as liberal, moderate, conservative, or something else?</b>",
+                name: 'political_ideology',
+                options: ['Very liberal', 'Liberal', 'Slightly liberal', 'Moderate/Middle-of-the-road', 'Slightly conservative', 'Conservative', 'Very Conservative', 'Other', "Don't know/Not political"],
+                required: true, 
+                horizontal: false}
+            ],
+        }
+        timeline.push(demos1)
+        
+        var demos2 = {
+            type: 'survey-text',
+            questions: [
+                {prompt: '<br><p><b>On average, how much time do you spend on social media on a given day?</b><br>Hours:',
+                name: 'soc_meida_hours',
+                required: true},
+                {prompt: '<p>Minutes:',
+                name: 'soc_media_minutes',
+                required: true}
+            ]
+        };
+        timeline.push(demos2);
+        
+        var prolific_id = {
+            type: 'survey-text',
+            questions: [
+                {prompt: '<br><p><b>Please copy and paste your Prolific ID into the box below:</b>',
+                name: 'prolific_id',
+                required: true}
+            ]
+        };
+        timeline.push(prolific_id);
+        
+        var platformLink = 'https://app.prolific.co/submissions/complete?cc=4P2BFNQ2';
+        var conclusion = {
+            type: 'html-button-response',
+            stimulus: '<p>Please copy the link below <b>and click the FINISH button below</b>.</p><p>Then paste the link in your browser to recieve your payment.</p><p>Thank you.</p><p><b>' + platformLink + '</b></p>',
+            choices: ['CLICK HERE TO FINISH']
+        };
+        timeline.push(conclusion);
+        
+        
+        // TASK CREATION
+        
+        var images = ['img/high_o/NOZ.png', 'img/high_o/BLY.png', 'img/high_o/CQW.png', 'img/high_o/RSV.png', 'img/high_o/AL9.png', 'img/high_o/wjb_higho.png', 'img/high_o/N27.png', 'img/high_o/ES5.png', 'img/high_o/FY2.png', 'img/high_n/KS3.png', 'img/high_n/QX1.png', 'img/high_n/CH7.png', 'img/high_n/IVY.png', 'img/high_n/DK3.png', 'img/high_n/HRZ.png', 'img/high_n/CFP.png', 'img/high_n/V18.png', 'img/high_n/BU5.png', 'img/low_n/D23.png', 'img/low_n/EZ0.png', 'img/low_n/AW2.png', 'img/low_n/AV1.png', 'img/low_n/BD6.png', 'img/low_n/JR8.png', 'img/low_n/NPV.png', 'img/low_n/NT9.png', 'img/low_n/wjb_lown.png'];
+        
+        jsPsych.init({
+            timeline: timeline, 
+            preload_images: images,
+            show_preload_progress_bar: false//,
+//            on_finish: function() {
+//                firebase.database().ref(firebase.auth().currentUser.uid).set({
+//                    data: jsPsych.data.get().values()
+//                })
+//            }
+        });
+    </script>
+</html>
